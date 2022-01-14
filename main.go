@@ -8,7 +8,9 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"time"
 
+	"github.com/didip/tollbooth/v6/limiter"
 	"github.com/gorilla/handlers"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/korylprince/ipscan/ping"
@@ -54,7 +56,13 @@ func RunServer() error {
 
 	mux := http.NewServeMux()
 	mux.Handle("/", svc.RequireAuth(authmux))
-	mux.Handle("/auth", svc.AuthHandler())
+
+	lmt := limiter.New(&limiter.ExpirableOptions{DefaultExpirationTTL: time.Hour}).
+		SetMax(float64(config.AuthRateLimit) / 60).
+		SetBurst(config.AuthRateLimit).
+		SetIPLookups([]string{"RemoteAddr"})
+
+	mux.Handle("/auth", LimitHandler(lmt, svc.AuthHandler()))
 
 	var handler http.Handler = LogHandler(NewLogger(os.Stdout), handlers.CompressHandler(mux))
 

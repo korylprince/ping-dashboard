@@ -23,6 +23,8 @@ QUEUESIZE | Size of pending ping/resolve queue | 1024
 TIMEOUT | Duration to wait for an ICMP echo response | 1 second
 USERNAME | Username for Basic Auth | admin
 PASSWORD | Password for Basic Auth. If using the prebuilt Docker container, you can also specify PASSWORD_FILE for use with Docker secrets | Must be configured
+AUTHRATELIMIT | Rate limit for authorization requests | 3 request per minute
+SessionDuration | Length of cookie session | 30 minutes
 PROXYHEADERS | Set to `true` if you want the server to rewrite IP addresses with X-Forwarded-For, etc headers | false
 LISTENADDR | The host:port address you want the server to listen on | :80
 

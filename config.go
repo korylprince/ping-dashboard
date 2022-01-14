@@ -11,7 +11,8 @@ type Config struct {
 
 	Username        string        `default:"admin"`
 	Password        string        `required:"true"`
-	SessionDuration time.Duration `default:"1h"`
+	AuthRateLimit   int           `default:"3"` // 3 requests per minute
+	SessionDuration time.Duration `default:"30m"`
 
 	ProxyHeaders bool   `default:"false"`
 	ListenAddr   string `default:":80"`
