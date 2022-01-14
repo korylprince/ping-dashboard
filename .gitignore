@@ -1,0 +1,4 @@
+*.swp
+ui/node_modules
+ping-dashboard
+hosts.yaml
