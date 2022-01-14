@@ -47,17 +47,16 @@ func RunServer() error {
 		return fmt.Errorf("could not start service: %w", err)
 	}
 
-	authMux := http.NewServeMux()
+	authmux := http.NewServeMux()
 	distFS, _ := fs.Sub(dist, "ui/dist")
-	authMux.Handle("/", http.FileServer(&EmbedFS{http.FS(distFS)}))
-	authMux.Handle("/token", svc.HandleToken())
+	authmux.Handle("/", http.FileServer(&EmbedFS{http.FS(distFS)}))
+	authmux.Handle("/ws", svc.HandlePing())
 
 	mux := http.NewServeMux()
-	mux.Handle("/", handlers.CompressHandler(
-		BasicAuthHandler(config.Username, config.Password, authMux)))
-	mux.Handle("/ws", svc.HandlePing())
+	mux.Handle("/", svc.RequireAuth(authmux))
+	mux.Handle("/auth", svc.AuthHandler())
 
-	var handler http.Handler = LogHandler(NewLogger(os.Stdout), mux)
+	var handler http.Handler = LogHandler(NewLogger(os.Stdout), handlers.CompressHandler(mux))
 
 	// rewrite for x-forwarded-for, etc headers
 	if config.ProxyHeaders {

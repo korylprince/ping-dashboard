@@ -2,10 +2,8 @@ package main
 
 import (
 	"crypto/rand"
-	"crypto/subtle"
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net"
 	"sync"
@@ -128,8 +126,8 @@ func (s *Service) pinger(c *conn, ips <-chan net.IP) error {
 
 // HandleConn resolves and pings all of the hosts in schema and handles the full converstion with ws
 func (s *Service) HandleConn(ws *websocket.Conn, schema Schema) (err error) {
-	type auth struct {
-		Token string `json:"token"`
+	if err = ws.WriteJSON(schema); err != nil {
+		return fmt.Errorf("could not write schema message: %w", err)
 	}
 
 	c := &conn{Conn: ws, mu: new(sync.Mutex)}
@@ -149,20 +147,6 @@ func (s *Service) HandleConn(ws *websocket.Conn, schema Schema) (err error) {
 		c.Close()
 		c.mu.Unlock()
 	}()
-
-	a := new(auth)
-	if err = c.ReadJSON(a); err != nil {
-		return fmt.Errorf("could not read token: %w", err)
-	}
-
-	if subtle.ConstantTimeEq(int32(len(a.Token)), int32(len(s.token))) != 1 ||
-		subtle.ConstantTimeCompare([]byte(a.Token), []byte(s.token)) != 1 {
-		return fmt.Errorf("could not authenticate: %w", errors.New("invalid token"))
-	}
-
-	if err = c.WriteJSON(schema); err != nil {
-		return fmt.Errorf("could not write schema message: %w", err)
-	}
 
 	hosts := make(chan string)
 	ips := make(chan net.IP)

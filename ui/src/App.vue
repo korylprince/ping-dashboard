@@ -78,14 +78,6 @@ export default {
         },
     },
     async created() {
-        let token
-        try {
-            token = await (await fetch("token")).text()
-        } catch (e) {
-            this.error = JSON.stringify(e)
-            console.error({msg: "token error:", error: e})
-            return
-        }
         let proto = "wss://"
         if (window.location.protocol == "http:") {
             proto = "ws://"
@@ -95,10 +87,6 @@ export default {
         socket.addEventListener("error", event => {
             this.error = JSON.stringify(event)
             console.error({msg: "websocket error:", error: event})
-        })
-
-        socket.addEventListener("open", () => {
-            socket.send(JSON.stringify({token}))
         })
 
         socket.addEventListener("message", event => {

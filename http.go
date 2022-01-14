@@ -6,15 +6,18 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
 
+const cookieName = "auth"
+
 // BasicAuthHandler is a HTTP Basic Auth handler
-func BasicAuthHandler(username, password string, next http.Handler) http.Handler {
-	user := []byte(username)
+func (s *Service) AuthHandler() http.Handler {
+	user := []byte(s.Config.Username)
 	userLen := int32(len(user))
-	pass := []byte(password)
+	pass := []byte(s.Config.Password)
 	passLen := int32(len(pass))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		u, p, ok := r.BasicAuth()
@@ -28,15 +31,43 @@ func BasicAuthHandler(username, password string, next http.Handler) http.Handler
 			return
 		}
 
-		next.ServeHTTP(w, r)
+		http.SetCookie(w, &http.Cookie{
+			Name:     cookieName,
+			Value:    s.token,
+			Domain:   r.Host,
+			Path:     "/",
+			Expires:  time.Now().Add(s.Config.SessionDuration),
+			HttpOnly: true,
+		})
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 	})
 }
 
-// HandleToken returns an http.Handler that returns the service token
-func (s *Service) HandleToken() http.Handler {
+func (s *Service) RequireAuth(next http.Handler) http.Handler {
+	token := []byte(s.token)
+	tokenLen := int32(len(s.token))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(s.token))
+		c, err := r.Cookie(cookieName)
+		if err != nil {
+			http.Redirect(w, r, "/auth", http.StatusTemporaryRedirect)
+			return
+		}
+		if subtle.ConstantTimeEq(tokenLen, int32(len([]byte(c.Value)))) != 1 ||
+			subtle.ConstantTimeCompare(token, []byte(c.Value)) != 1 {
+			http.Redirect(w, r, "/auth", http.StatusTemporaryRedirect)
+			return
+		}
+
+		http.SetCookie(w, &http.Cookie{
+			Name:     cookieName,
+			Value:    s.token,
+			Domain:   r.Host,
+			Path:     "/",
+			Expires:  time.Now().Add(s.Config.SessionDuration),
+			HttpOnly: true,
+		})
+
+		next.ServeHTTP(w, r)
 	})
 }
 

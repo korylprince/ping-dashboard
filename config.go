@@ -9,8 +9,9 @@ type Config struct {
 	QueueSize int           `default:"1024"`
 	Timeout   time.Duration `default:"1s"`
 
-	Username string `default:"admin"`
-	Password string `required:"true"`
+	Username        string        `default:"admin"`
+	Password        string        `required:"true"`
+	SessionDuration time.Duration `default:"1h"`
 
 	ProxyHeaders bool   `default:"false"`
 	ListenAddr   string `default:":80"`
