@@ -86,7 +86,11 @@ export default {
             console.error({msg: "token error:", error: e})
             return
         }
-        const socket = new WebSocket("ws://localhost/ws")
+        let proto = "wss://"
+        if (window.location.protocol == "http:") {
+            proto = "ws://"
+        }
+        const socket = new WebSocket(`${proto}${window.location.host}/ws`)
 
         socket.addEventListener("error", event => {
             this.error = JSON.stringify(event)
