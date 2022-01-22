@@ -49,13 +49,12 @@ func RunServer() error {
 		return fmt.Errorf("could not start service: %w", err)
 	}
 
-	authmux := http.NewServeMux()
-	distFS, _ := fs.Sub(dist, "ui/dist")
-	authmux.Handle("/", http.FileServer(&EmbedFS{http.FS(distFS)}))
-	authmux.Handle("/ws", svc.HandlePing())
-
 	mux := http.NewServeMux()
-	mux.Handle("/", svc.RequireAuth(authmux))
+
+	distFS, _ := fs.Sub(dist, "ui/dist")
+	mux.Handle("/", svc.RequireAuth(http.FileServer(&EmbedFS{http.FS(distFS)}), svc.RejectAuthRedirect()))
+
+	mux.Handle("/ws", svc.RequireAuth(svc.HandlePing(), svc.RejectAuthWebsocket()))
 
 	lmt := limiter.New(&limiter.ExpirableOptions{DefaultExpirationTTL: time.Hour}).
 		SetMax(float64(config.AuthRateLimit) / 60).

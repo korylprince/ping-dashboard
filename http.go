@@ -43,7 +43,7 @@ func (s *Service) AuthHandler() http.Handler {
 	})
 }
 
-func (s *Service) RequireAuth(next http.Handler) http.Handler {
+func (s *Service) RequireAuth(next, unauth http.Handler) http.Handler {
 	token := []byte(s.token)
 	tokenLen := int32(len(s.token))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -54,7 +54,7 @@ func (s *Service) RequireAuth(next http.Handler) http.Handler {
 		}
 		if subtle.ConstantTimeEq(tokenLen, int32(len([]byte(c.Value)))) != 1 ||
 			subtle.ConstantTimeCompare(token, []byte(c.Value)) != 1 {
-			http.Redirect(w, r, "/auth", http.StatusTemporaryRedirect)
+			unauth.ServeHTTP(w, r)
 			return
 		}
 
@@ -68,6 +68,29 @@ func (s *Service) RequireAuth(next http.Handler) http.Handler {
 		})
 
 		next.ServeHTTP(w, r)
+	})
+}
+
+func (s *Service) RejectAuthRedirect() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/auth", http.StatusTemporaryRedirect)
+	})
+}
+
+func (s *Service) RejectAuthWebsocket() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		l := r.Context().Value(ContextKeyLog).(*Log)
+		c, err := (&websocket.Upgrader{}).Upgrade(w, r, nil)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			l.Error = &Error{fmt.Errorf("could not start websocket conn: %w", err)}
+			return
+		}
+		if err = c.WriteJSON(map[string]string{"t": "u"}); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			l.Error = &Error{fmt.Errorf("could not write unauthenticated message: %w", err)}
+			return
+		}
 	})
 }
 

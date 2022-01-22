@@ -92,6 +92,9 @@ export default {
         socket.addEventListener("message", event => {
             const msg = JSON.parse(event.data)
             switch (msg.t) {
+                case "u":
+                    window.location = "/auth"
+                    break
                 case "s":
                     for (const category of msg.s) {
                         const c = {category: category.category, hosts: []}
