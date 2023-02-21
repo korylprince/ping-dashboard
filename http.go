@@ -49,7 +49,7 @@ func (s *Service) RequireAuth(next, unauth http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		c, err := r.Cookie(cookieName)
 		if err != nil {
-			http.Redirect(w, r, "/auth", http.StatusTemporaryRedirect)
+			unauth.ServeHTTP(w, r)
 			return
 		}
 		if subtle.ConstantTimeEq(tokenLen, int32(len([]byte(c.Value)))) != 1 ||
