@@ -19,7 +19,7 @@ github.com/gorilla/websocket
 # github.com/kelseyhightower/envconfig v1.4.0
 ## explicit
 github.com/kelseyhightower/envconfig
-# github.com/korylprince/go-icmpv4/v2 v2.1.0
+# github.com/korylprince/go-icmpv4/v2 v2.0.2
 ## explicit; go 1.14
 github.com/korylprince/go-icmpv4/v2
 github.com/korylprince/go-icmpv4/v2/echo

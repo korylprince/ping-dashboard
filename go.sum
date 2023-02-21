@@ -16,9 +16,8 @@ github.com/gorilla/websocket v1.5.0 h1:PPwGk2jz7EePpoHN/+ClbZu8SPxiqlu12wZP/3sWm
 github.com/gorilla/websocket v1.5.0/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/kelseyhightower/envconfig v1.4.0 h1:Im6hONhd3pLkfDFsbRgu68RDNkGF1r3dvMUtDTo2cv8=
 github.com/kelseyhightower/envconfig v1.4.0/go.mod h1:cccZRl6mQpaq41TPp5QxidR+Sa3axMbJDNb//FQX6Gg=
+github.com/korylprince/go-icmpv4/v2 v2.0.2 h1:bUPZwfb09XnVqJYrMdd4LEBV24IHhGfgkIJGtutu4Po=
 github.com/korylprince/go-icmpv4/v2 v2.0.2/go.mod h1:+X3YHb56+5TtpzTWa80rPcT6iRc3Q5EXIhRRswWTPpU=
-github.com/korylprince/go-icmpv4/v2 v2.1.0 h1:qWQ2QszQKl6roixaAhzL/xlF11APCry1jwJKysx934Q=
-github.com/korylprince/go-icmpv4/v2 v2.1.0/go.mod h1:+X3YHb56+5TtpzTWa80rPcT6iRc3Q5EXIhRRswWTPpU=
 github.com/korylprince/ipnetgen v1.0.1/go.mod h1:S0y7uqM4hX9g3NstxMbp6qmfHDSSXuEwcp05bb2zaiw=
 github.com/korylprince/ipscan v1.0.4 h1:7rvXAB+2xcKWoz6W12s/wVg16/3BUYqwp3AmgRvPCPg=
 github.com/korylprince/ipscan v1.0.4/go.mod h1:3UPILin7dKpdvK1RQAeV9iBfCT6Xyi+DW9wIKK8UDlQ=
