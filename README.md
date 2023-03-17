@@ -47,4 +47,4 @@ HOSTSPATH should point to a yaml file with the following schema:
 
 ping-dashboard is intended to be deployed behind a reverse proxy with TLS termination (e.g. traefik, nginx, etc). Don't forget to set PROXYHEADERS to true if doing so.
 
-There's a prebuilt Docker container at `korylprince/ping-dashboard:<tagged version>`.
+There's a prebuilt Docker container at `ghcr.io/korylprince/ping-dashboard:<tagged version>`.

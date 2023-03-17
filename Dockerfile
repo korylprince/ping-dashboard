@@ -1,15 +1,16 @@
 FROM golang:1-alpine as builder
 
-ARG VERSION
-
 RUN go install github.com/korylprince/fileenv@v1.1.0
-RUN go install "github.com/korylprince/ping-dashboard@$VERSION"
 
-FROM alpine:3.15
+FROM alpine:latest
+
+ARG GO_PROJECT_NAME
+ENV GO_PROJECT_NAME=${GO_PROJECT_NAME}
 
 RUN apk add --no-cache ca-certificates
 
 COPY --from=builder /go/bin/fileenv /
-COPY --from=builder /go/bin/ping-dashboard /ping-dashboard
+COPY docker-entrypoint.sh /
+COPY ${GO_PROJECT_NAME} /
 
-CMD ["/fileenv", "/ping-dashboard"]
+CMD ["/fileenv", "/docker-entrypoint.sh"]
