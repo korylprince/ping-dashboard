@@ -27,6 +27,9 @@ type EmbedFile struct {
 
 func (f *EmbedFile) Stat() (os.FileInfo, error) {
 	fi, err := f.File.Stat()
+	if err != nil {
+		return nil, fmt.Errorf("could not stat file: %w", err)
+	}
 	binInfo, err := os.Stat(os.Args[0])
 	if err != nil {
 		return nil, fmt.Errorf("could not get binary ModTime: %w", err)
