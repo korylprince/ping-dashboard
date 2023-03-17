@@ -16,15 +16,18 @@ type EmbedFS struct {
 	http.FileSystem
 }
 
+// Open implements http.FileSystem
 func (f *EmbedFS) Open(name string) (http.File, error) {
 	file, err := f.FileSystem.Open(name)
 	return &EmbedFile{File: file}, err
 }
 
+// EmbedFile wraps an http.File. See EmbedFS for more information
 type EmbedFile struct {
 	http.File
 }
 
+// Stat implements http.File
 func (f *EmbedFile) Stat() (os.FileInfo, error) {
 	fi, err := f.File.Stat()
 	if err != nil {
@@ -37,11 +40,13 @@ func (f *EmbedFile) Stat() (os.FileInfo, error) {
 	return &EmbedFileInfo{FileInfo: fi, modTime: binInfo.ModTime()}, err
 }
 
+// EmbedFileInfo wraps an os.FileInfo. See EmbedFS for more information
 type EmbedFileInfo struct {
 	os.FileInfo
 	modTime time.Time
 }
 
+// ModTime implements fs.FileInfo
 func (f *EmbedFileInfo) ModTime() time.Time {
 	return f.modTime
 }

@@ -13,7 +13,7 @@ import (
 
 const cookieName = "auth"
 
-// BasicAuthHandler is a HTTP Basic Auth handler
+// AuthHandler is a HTTP Basic Auth handler
 func (s *Service) AuthHandler() http.Handler {
 	user := []byte(s.Config.Username)
 	userLen := int32(len(user))
@@ -43,6 +43,7 @@ func (s *Service) AuthHandler() http.Handler {
 	})
 }
 
+// RequireAuth is an HTTP middleware that verifies authentication and uses the unauth handler if authentication fails
 func (s *Service) RequireAuth(next, unauth http.Handler) http.Handler {
 	token := []byte(s.token)
 	tokenLen := int32(len(s.token))
@@ -71,12 +72,14 @@ func (s *Service) RequireAuth(next, unauth http.Handler) http.Handler {
 	})
 }
 
+// RejectAuthRedirect redirects the client to the authentication handler
 func (s *Service) RejectAuthRedirect() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/auth", http.StatusTemporaryRedirect)
 	})
 }
 
+// RejectAuthWebsocket notifies the client via the websocket that authentication failed
 func (s *Service) RejectAuthWebsocket() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		l := r.Context().Value(ContextKeyLog).(*Log)

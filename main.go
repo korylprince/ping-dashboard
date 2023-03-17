@@ -17,6 +17,7 @@ import (
 	"github.com/korylprince/ipscan/resolve"
 )
 
+// RunServer starts the server
 func RunServer() error {
 	config := new(Config)
 	err := envconfig.Process("", config)
@@ -63,7 +64,7 @@ func RunServer() error {
 
 	mux.Handle("/auth", LimitHandler(lmt, svc.AuthHandler()))
 
-	var handler http.Handler = LogHandler(NewLogger(os.Stdout), handlers.CompressHandler(mux))
+	var handler = LogHandler(NewLogger(os.Stdout), handlers.CompressHandler(mux))
 
 	// rewrite for x-forwarded-for, etc headers
 	if config.ProxyHeaders {

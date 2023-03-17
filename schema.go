@@ -14,6 +14,7 @@ type Schema []struct {
 	Hosts    []string `json:"hosts"`
 }
 
+// MarshalJSON implements the json.Marshaler interface
 func (s Schema) MarshalJSON() ([]byte, error) {
 	type schema2 Schema
 	type schema struct {

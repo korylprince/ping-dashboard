@@ -19,12 +19,14 @@ type conn struct {
 	mu *sync.Mutex
 }
 
+// Resolve is the result of DNS resolution
 type Resolve struct {
 	Hostname string
 	IPs      []net.IP
 	Error    error
 }
 
+// MarshalJSON implements the json.Marshaler interface
 func (r *Resolve) MarshalJSON() ([]byte, error) {
 	type resolve struct {
 		Type     string   `json:"t"`
@@ -50,11 +52,13 @@ func (r *Resolve) MarshalJSON() ([]byte, error) {
 	return json.Marshal(res)
 }
 
+// Ping is the result of a ping
 type Ping struct {
 	*ping.Ping
 	Error error
 }
 
+// MarshalJSON implements the json.Marshaler interface
 func (p *Ping) MarshalJSON() ([]byte, error) {
 	type ping struct {
 		Type    string `json:"t"`
@@ -78,6 +82,7 @@ func (p *Ping) MarshalJSON() ([]byte, error) {
 	return json.Marshal(pin)
 }
 
+// Service is a ping service
 type Service struct {
 	Config   *Config
 	Resolver *resolve.Service
@@ -85,6 +90,7 @@ type Service struct {
 	token    string
 }
 
+// NewService returns a new Service
 func NewService(config *Config, resolver *resolve.Service, pinger *ping.Service) (*Service, error) {
 	token := make([]byte, 32)
 	if _, err := rand.Read(token); err != nil {

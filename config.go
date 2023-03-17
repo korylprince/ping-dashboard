@@ -2,6 +2,7 @@ package main
 
 import "time"
 
+// Config configures ping-dashboard
 type Config struct {
 	HostsPath string        `required:"true"`
 	Pingers   int           `default:"0"`
