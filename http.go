@@ -43,8 +43,8 @@ func (s *Service) AuthHandler() http.Handler {
 	})
 }
 
-// RequireAuth is an HTTP middleware that verifies authentication and uses the unauth handler if authentication fails
-func (s *Service) RequireAuth(next, unauth http.Handler) http.Handler {
+// RequireCookieAuth is an HTTP middleware that verifies cookie authentication and uses the unauth handler if authentication fails
+func (s *Service) RequireCookieAuth(next, unauth http.Handler) http.Handler {
 	token := []byte(s.token)
 	tokenLen := int32(len(s.token))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -67,6 +67,32 @@ func (s *Service) RequireAuth(next, unauth http.Handler) http.Handler {
 			Expires:  time.Now().Add(s.Config.SessionDuration),
 			HttpOnly: true,
 		})
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+// RequireAuth is an HTTP middleware that verifies posted basic authentication
+func (s *Service) RequireAuth(next http.Handler) http.Handler {
+	user := []byte(s.Config.Username)
+	userLen := int32(len(user))
+	pass := []byte(s.Config.Password)
+	passLen := int32(len(pass))
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+		u, p, ok := r.BasicAuth()
+		if !ok ||
+			subtle.ConstantTimeEq(userLen, int32(len([]byte(u)))) != 1 ||
+			subtle.ConstantTimeCompare(user, []byte(u)) != 1 ||
+			subtle.ConstantTimeEq(passLen, int32(len([]byte(p)))) != 1 ||
+			subtle.ConstantTimeCompare(pass, []byte(p)) != 1 {
+			w.Header().Set("WWW-Authenticate", "Basic")
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
 
 		next.ServeHTTP(w, r)
 	})
@@ -128,5 +154,12 @@ func (s *Service) HandlePing() http.Handler {
 			l.Error = &Error{fmt.Errorf("could not finish websocket conn: %w", err)}
 			return
 		}
+	})
+}
+
+// HandleSchema returns an http.Handler that serves the host schema
+func (s *Service) HandleSchema() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, s.Config.HostsPath)
 	})
 }

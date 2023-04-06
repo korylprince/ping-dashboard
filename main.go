@@ -53,9 +53,9 @@ func RunServer() error {
 	mux := http.NewServeMux()
 
 	distFS, _ := fs.Sub(dist, "ui/dist")
-	mux.Handle("/", svc.RequireAuth(http.FileServer(&EmbedFS{http.FS(distFS)}), svc.RejectAuthRedirect()))
+	mux.Handle("/", svc.RequireCookieAuth(http.FileServer(&EmbedFS{http.FS(distFS)}), svc.RejectAuthRedirect()))
 
-	mux.Handle("/ws", svc.RequireAuth(svc.HandlePing(), svc.RejectAuthWebsocket()))
+	mux.Handle("/ws", svc.RequireCookieAuth(svc.HandlePing(), svc.RejectAuthWebsocket()))
 
 	lmt := limiter.New(&limiter.ExpirableOptions{DefaultExpirationTTL: time.Hour}).
 		SetMax(float64(config.AuthRateLimit) / 60).
@@ -63,6 +63,8 @@ func RunServer() error {
 		SetIPLookups([]string{"RemoteAddr"})
 
 	mux.Handle("/auth", LimitHandler(lmt, svc.AuthHandler()))
+
+	mux.Handle("/schema", LimitHandler(lmt, svc.RequireAuth(svc.HandleSchema())))
 
 	var handler = LogHandler(NewLogger(os.Stdout), handlers.CompressHandler(mux))
 
